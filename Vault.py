@@ -26,7 +26,7 @@ website TEXT NOT NULL);
 class TLW(ctk.CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.geometry("400x300")
+        self.geometry("500x500")
 
 
 class PasswordManager(ctk.CTk):
@@ -60,10 +60,10 @@ class PasswordManager(ctk.CTk):
     def vault(self):
         self.grid_rowconfigure((0, 3), weight=1)
         self.grid_columnconfigure((0, 3), weight=1)
-        self.passwordvault_credentials = ctk.CTkTextbox(master=self, corner_radius=0)
+        self.passwordvault_credentials = ctk.CTkEntry(master=self, corner_radius=0)
         self.passwordvault_credentials.grid(row=0, column=0, rowspan=2, columnspan=4, padx=20, pady=(20, 0),
                                             sticky="nsew")
-        self.passwordvault_credentials.insert("0.0", self.password)
+        self.passwordvault_credentials.insert("0", self.password)
 
         # Button Options
         self.cimput = ctk.CTkButton(master=self, text="Add Entry", command=self.add_e)
@@ -82,6 +82,8 @@ class PasswordManager(ctk.CTk):
         print("Username: ", self.username.get(), "Password: ", self.password.get())
         if self.username.get() == "" or self.password.get() == "":
             print("Try Again...")
+        elif self.username.get() == " " or self.password.get() == " ":
+            print("Please Fill out the Credentials.")
         else:
             self.frame.destroy()
             self.vault()
@@ -107,7 +109,7 @@ class PasswordManager(ctk.CTk):
 
         self.password = "".join(self.password)
         print("\n" + self.password + "\n")
-        self.passwordvault_credentials.insert("0.0", self.password)
+        self.passwordvault_credentials.insert("0", self.password)
 
     def add_e(self):
         self.adbutton = TLW(self)
@@ -123,8 +125,21 @@ class PasswordManager(ctk.CTk):
                                     border_width=2, corner_radius=10)
         self.w_entry.pack(side="top", padx=20, pady=20)
 
-        self.button = ctk.CTkButton(master=self.adbutton, text="ADD")
+        self.button = ctk.CTkButton(master=self.adbutton, text="ADD", command=self.insert)
         self.button.pack(padx=20, pady=20)
+
+    def insert(self):
+        username = self.u_entry.get()
+        password = self.p_entry.get()
+        website = self.w_entry.get()
+        print("Username: ", username, "Password: ", password, "Website: ", website)
+
+        insertion = """INSERT INTO vault(username,password,website)
+        VALUES(?,?,?)"""
+        cursor.execute(insertion, (username, password, website))
+        db.commit()
+
+
 
 
 if __name__ == "__main__":
