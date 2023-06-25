@@ -37,7 +37,7 @@ class PasswordManager(ctk.CTk):
         super().__init__()
 
         # background image
-        self.bg_image = ctk.CTkImage(Image.open("vault2.png"), size=(200, 200))
+        ##self.bg_image = ctk.CTkImage(Image.open("vault2.png"), size=(200, 200))
         # initialize the login screen window
         self.title("Password Manager")
         self.geometry(f"{self.width}x{self.height}")
@@ -45,8 +45,8 @@ class PasswordManager(ctk.CTk):
         # creating login system
         self.frame = ctk.CTkFrame(self, corner_radius=0)
         self.frame.pack(padx=20, pady=20)
-        self.label = ctk.CTkLabel(self.frame, text="*", image=self.bg_image)
-        self.label.pack(padx=20, pady=20)
+        ##self.label = ctk.CTkLabel(self.frame, text="*", image=self.bg_image)
+        ##self.label.pack(padx=20, pady=20)
         self.username = ctk.CTkEntry(self.frame, placeholder_text="Username")
         self.username.pack(padx=20, pady=20)
         self.password = ctk.CTkEntry(self.frame, placeholder_text="Password", show="*")
@@ -125,6 +125,18 @@ class PasswordManager(ctk.CTk):
 
         self.button = ctk.CTkButton(master=self.adbutton, text="ADD")
         self.button.pack(padx=20, pady=20)
+
+
+    def insert(self):
+        username = self.u_entry.get()
+        password = self.p_entry.get()
+        website = self.w_entry.get()
+        print("Username: ", username, "Password: ", password, "Website: ", website)
+
+        insertion = """INSERT INTO vault(username,password,website)
+        VALUES(?,?,?)"""
+        cursor.execute(insertion, (username, password, website))
+        db.commit()
 
 
 if __name__ == "__main__":
