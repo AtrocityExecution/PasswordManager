@@ -7,20 +7,13 @@ import tkinter as tk
 from tkinter import *
 from PIL import Image
 import os
+from Database import *
 
 ctk.set_appearance_mode("System")
-ctk.set_default_color_theme("green")
+ctk.set_default_color_theme("blue")
 
-with sqlite3.connect('vault.db') as db:
-    cursor = db.cursor()
-
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS vault(
-id INTEGER PRIMARY KEY,
-username TEXT NOT NULL,
-password TEXT NOT NULL,
-website TEXT NOT NULL);
-""")
+db_connect()
+udb_connect()
 
 
 class TLW(ctk.CTkToplevel):
@@ -30,14 +23,14 @@ class TLW(ctk.CTkToplevel):
 
 
 class PasswordManager(ctk.CTk):
-    width = 500
-    height = 500
+    width = 1000
+    height = 650
 
     def __init__(self):
         super().__init__()
 
         # background image
-        ##self.bg_image = ctk.CTkImage(Image.open("vault2.png"), size=(200, 200))
+        self.bg_image = ctk.CTkImage(Image.open("vault2.png"), size=(200, 200))
         # initialize the login screen window
         self.title("Password Manager")
         self.geometry(f"{self.width}x{self.height}")
@@ -45,25 +38,49 @@ class PasswordManager(ctk.CTk):
         # creating login system
         self.frame = ctk.CTkFrame(self, corner_radius=0)
         self.frame.pack(padx=20, pady=20)
-        ##self.label = ctk.CTkLabel(self.frame, text="*", image=self.bg_image)
-        ##self.label.pack(padx=20, pady=20)
+        self.label = ctk.CTkLabel(self.frame, text="*", image=self.bg_image)
+        self.label.pack(padx=20, pady=20)
         self.username = ctk.CTkEntry(self.frame, placeholder_text="Username")
         self.username.pack(padx=20, pady=20)
         self.password = ctk.CTkEntry(self.frame, placeholder_text="Password", show="*")
         self.password.pack(padx=20, pady=20)
         self.login_button = ctk.CTkButton(self.frame, text="Login", command=self.login_event, width=200)
         self.login_button.pack(padx=20, pady=20)
+        self.create_account = ctk.CTkButton(self.frame, text="Create Account", command=self.create_acc, width=200)
+        self.create_account.pack(padx=20, pady=20)
+        self.app_exit = ctk.CTkButton(self.frame, text="Exit", command=self.quit, width=200)
+        self.app_exit.pack(padx=20, pady=20)
         self.rm_checkbox = ctk.CTkCheckBox(self.frame, text="Remember Me")
         self.rm_checkbox.pack(padx=20, pady=20)
 
+    def create_acc(self):
+        self.acc_button = TLW(self)
+        self.acc_label = ctk.CTkLabel(self.acc_button, text="Create a Username and Password.")
+        self.acc_label.pack(side="top", padx=20, pady=20)
+        self.u_entry = ctk.CTkEntry(master=self.acc_button, placeholder_text="Username", width=120, height=25,
+                                    border_width=2, corner_radius=10)
+        self.u_entry.pack(side="top", padx=20, pady=20)
+        self.p_entry = ctk.CTkEntry(master=self.acc_button, placeholder_text="Password", show="*", width=120, height=25,
+                                    border_width=2, corner_radius=10)
+        self.p_entry.pack(side="top", padx=20, pady=20)
+
+        self.button = ctk.CTkButton(master=self.acc_button, text="Create Account", command=self.user_insert)
+        self.button.pack(padx=20, pady=20)
+
     # creating password vault menu
     def vault(self):
+        # Password Credentials
         self.grid_rowconfigure((0, 3), weight=1)
         self.grid_columnconfigure((0, 3), weight=1)
-        self.passwordvault_credentials = ctk.CTkEntry(master=self, corner_radius=0)
-        self.passwordvault_credentials.grid(row=0, column=0, rowspan=2, columnspan=4, padx=20, pady=(20, 0),
-                                            sticky="nsew")
-        self.passwordvault_credentials.insert("0", self.password)
+        ##self.PC_frame = ctk.CTkFrame(self, corner_radius=0, command=self.show_creds)
+        ##self.PC_frame.grid(row=0, column=0, rowspan=2, columnspan=4, padx=20, pady=(20, 0),
+                                            ##sticky="nsew")
+        self.PC_Label = ctk.CTkLabel(master=self, text="Credentials", fg_color="transparent")
+        self.PC_Label.grid(row=0, column=0, padx=20, pady=(20, 0))
+        self.PC_User = ctk.CTkLabel(master=self, text="Username", fg_color="transparent")
+        self.PC_Label.grid(row=1, column=1, padx=20, pady=(20, 0))
+
+        ##self.passwordvault_credentials.insert("0", self.password)
 
         # Button Options
         self.cimput = ctk.CTkButton(master=self, text="Add Entry", command=self.add_e)
@@ -125,10 +142,12 @@ class PasswordManager(ctk.CTk):
                                     border_width=2, corner_radius=10)
         self.w_entry.pack(side="top", padx=20, pady=20)
 
-        self.button = ctk.CTkButton(master=self.adbutton, text="ADD", command=self.insert)
+        self.button = ctk.CTkButton(master=self.adbutton, text="ADD", command=self.cred_insert)
         self.button.pack(padx=20, pady=20)
 
-    def insert(self):
+    def cred_insert(self):
+        con = sq.connect('vault.db')
+        c = con.cursor()
         username = self.u_entry.get()
         password = self.p_entry.get()
         website = self.w_entry.get()
@@ -136,22 +155,31 @@ class PasswordManager(ctk.CTk):
 
         insertion = """INSERT INTO vault(username,password,website)
         VALUES(?,?,?)"""
-        cursor.execute(insertion, (username, password, website))
-        db.commit()
+        c.execute(insertion, (username, password, website))
+        con.commit()
 
-
-
-
-    def insert(self):
+    def user_insert(self):
+        con = sq.connect('users.db')
+        u = con.cursor()
         username = self.u_entry.get()
         password = self.p_entry.get()
-        website = self.w_entry.get()
-        print("Username: ", username, "Password: ", password, "Website: ", website)
+        print("Username: ", username, "Password: ", password)
 
-        insertion = """INSERT INTO vault(username,password,website)
-        VALUES(?,?,?)"""
-        cursor.execute(insertion, (username, password, website))
-        db.commit()
+        insertion = """INSERT INTO users(username,password)
+        VALUES(?,?)"""
+        u.execute(insertion, (username, password))
+        con.commit()
+
+    # Needs Work
+    def show_creds(self):
+        '''
+        con = sq.connect('vault.db')
+        c = con.cursor()
+        c.execute("SELECT * FROM vault")
+        i = c.fetchall()
+        return i
+        '''
+
 
 
 if __name__ == "__main__":
