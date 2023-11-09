@@ -8,13 +8,12 @@ from tkinter import *
 from PIL import Image
 import os
 from Database import *
+from  Credentials import *
+import json
 
 ctk.set_appearance_mode("System")
-ctk.set_default_color_theme("blue")
-
-db_connect()
-udb_connect()
-
+ctk.set_default_color_theme("dark-blue")
+vault = {}
 
 class TLW(ctk.CTkToplevel):
     def __init__(self, *args, **kwargs):
@@ -96,14 +95,17 @@ class PasswordManager(ctk.CTk):
     # creating a login event that allows user io input credentials and access the vault
     # NEEDS WORK
     def login_event(self):
+        username = self.username.get()
+        password = self.password.get()
+
         print("Username: ", self.username.get(), "Password: ", self.password.get())
-        if self.username.get() == "" or self.password.get() == "":
-            print("Try Again...")
-        elif self.username.get() == " " or self.password.get() == " ":
-            print("Please Fill out the Credentials.")
+        if check_user_acc(username, password):
+            ##self.frame.destroy()
+            ##self.vault()
+            print("Login Successful")
         else:
-            self.frame.destroy()
-            self.vault()
+            print("Try Again...")
+
 
     # creating an event that logs out the user
     # NEEDS WORK
@@ -145,6 +147,7 @@ class PasswordManager(ctk.CTk):
         self.button = ctk.CTkButton(master=self.adbutton, text="ADD", command=self.cred_insert)
         self.button.pack(padx=20, pady=20)
 
+    # NEEDS WORK
     def cred_insert(self):
         con = sq.connect('vault.db')
         c = con.cursor()
@@ -159,16 +162,13 @@ class PasswordManager(ctk.CTk):
         con.commit()
 
     def user_insert(self):
-        con = sq.connect('users.db')
-        u = con.cursor()
         username = self.u_entry.get()
         password = self.p_entry.get()
+        website = "example.com"
         print("Username: ", username, "Password: ", password)
+        create_user_account(username, password)
 
-        insertion = """INSERT INTO users(username,password)
-        VALUES(?,?)"""
-        u.execute(insertion, (username, password))
-        con.commit()
+        ##self.message = ctk.C
 
     # Needs Work
     def show_creds(self):
