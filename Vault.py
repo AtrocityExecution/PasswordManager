@@ -7,13 +7,13 @@ import tkinter as tk
 from tkinter import *
 from PIL import Image
 import os
-from Database import *
-from  Credentials import *
+from Credentials import *
 import json
 
 ctk.set_appearance_mode("System")
-ctk.set_default_color_theme("dark-blue")
+ctk.set_default_color_theme("green")
 vault = {}
+
 
 class TLW(ctk.CTkToplevel):
     def __init__(self, *args, **kwargs):
@@ -62,6 +62,9 @@ class PasswordManager(ctk.CTk):
         self.p_entry = ctk.CTkEntry(master=self.acc_button, placeholder_text="Password", show="*", width=120, height=25,
                                     border_width=2, corner_radius=10)
         self.p_entry.pack(side="top", padx=20, pady=20)
+        self.e_entry = ctk.CTkEntry(master=self.acc_button, placeholder_text="Email", width=120, height=25,
+                                    border_width=2, corner_radius=10)
+        self.e_entry.pack(side="top", padx=20, pady=20)
 
         self.button = ctk.CTkButton(master=self.acc_button, text="Create Account", command=self.user_insert)
         self.button.pack(padx=20, pady=20)
@@ -73,7 +76,7 @@ class PasswordManager(ctk.CTk):
         self.grid_columnconfigure((0, 3), weight=1)
         ##self.PC_frame = ctk.CTkFrame(self, corner_radius=0, command=self.show_creds)
         ##self.PC_frame.grid(row=0, column=0, rowspan=2, columnspan=4, padx=20, pady=(20, 0),
-                                            ##sticky="nsew")
+        ##sticky="nsew")
         self.PC_Label = ctk.CTkLabel(master=self, text="Credentials", fg_color="transparent")
         self.PC_Label.grid(row=0, column=0, padx=20, pady=(20, 0))
         self.PC_User = ctk.CTkLabel(master=self, text="Username", fg_color="transparent")
@@ -99,13 +102,12 @@ class PasswordManager(ctk.CTk):
         password = self.password.get()
 
         print("Username: ", self.username.get(), "Password: ", self.password.get())
-        if check_user_acc(username, password):
-            ##self.frame.destroy()
-            ##self.vault()
+        if login(username, password):
+            self.frame.destroy()
+            self.vault()
             print("Login Successful")
         else:
             print("Try Again...")
-
 
     # creating an event that logs out the user
     # NEEDS WORK
@@ -131,6 +133,7 @@ class PasswordManager(ctk.CTk):
         self.passwordvault_credentials.insert("0", self.password)
 
     def add_e(self):
+
         self.adbutton = TLW(self)
         self.label = ctk.CTkLabel(self.adbutton, text="Add the entries below")
         self.label.pack(side="top", padx=20, pady=20)
@@ -149,26 +152,20 @@ class PasswordManager(ctk.CTk):
 
     # NEEDS WORK
     def cred_insert(self):
-        con = sq.connect('vault.db')
-        c = con.cursor()
         username = self.u_entry.get()
         password = self.p_entry.get()
         website = self.w_entry.get()
         print("Username: ", username, "Password: ", password, "Website: ", website)
 
-        insertion = """INSERT INTO vault(username,password,website)
-        VALUES(?,?,?)"""
-        c.execute(insertion, (username, password, website))
-        con.commit()
-
     def user_insert(self):
         username = self.u_entry.get()
         password = self.p_entry.get()
+        email = self.e_entry.get()
         website = "example.com"
-        print("Username: ", username, "Password: ", password)
-        create_user_account(username, password)
+        print("Username: ", username, "Password: ", password, "Email: ", email)
+        create_user_account(username, password, email)
 
-        ##self.message = ctk.C
+        # Display message
 
     # Needs Work
     def show_creds(self):
@@ -179,7 +176,6 @@ class PasswordManager(ctk.CTk):
         i = c.fetchall()
         return i
         '''
-
 
 
 if __name__ == "__main__":
