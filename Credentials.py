@@ -1,6 +1,6 @@
-import base64
 import json
 import bcrypt
+import os
 
 
 def hash_password(password):
@@ -11,16 +11,20 @@ def hash_password(password):
 
 
 def save(filename, data):
-
     with open(filename, 'w') as file:
         json.dump(data, file, indent=2)
 
 
-def load(filename):
+"""def add(filename, data):
+    with open(filename, 'a+') as file:
+        json.dump(data, file, indent=2)
+"""
 
+
+def load(filename):
     with open(filename, 'r') as file:
-        data = json.load(file)
-    return data
+        file_data = json.load(file)
+    return file_data
 
 
 def check_password(master_p, stored_hash, salt):
@@ -42,7 +46,8 @@ def create_user_account(user, master_p, email):
     # If not, create a new account for the user
     except FileNotFoundError:
 
-        # user's credentials
+        # user's account(vault)
+
         user_vault = {
             "user": user,
             "master_p": hashed_password.decode('utf-8'),
@@ -53,9 +58,35 @@ def create_user_account(user, master_p, email):
 
         }
 
-        save(f"{user}.json", user_vault)
+        save(filename, user_vault)
 
         print(f"User account for '{user}' has been created")
+
+
+def add_user_credentials(user, username, password, website):
+    filename = f"{user}_passwords.json"
+
+    if not os.path.exists(filename):
+        data = []
+    else:
+
+        try:
+            with open(filename, 'r') as file:
+                data = json.load(file)
+        except json.JSONDecodeError:
+            data = []
+
+    hashed_password, salt = hash_password(password)
+    credentials = {
+        "username": username,
+        "password": hashed_password.decode('utf-8'),
+        "salt": salt.decode('utf-8'),
+        "website": website
+    }
+    data.append(credentials)
+    with open(filename, 'w') as file:
+        json.dump(data, file, indent=4)
+    print(f"Credentials for '{user}' has been added.")
 
 
 def login(user, master_p):
@@ -65,7 +96,8 @@ def login(user, master_p):
     try:
         with open(filename, 'r') as file:
 
-            if check_password(master_p, userdata['master_p'].encode('utf-8'),userdata['salt'].encode('utf-8')):
+            if check_password(master_p, userdata['master_p'].encode('utf-8'), userdata['salt'].encode('utf-8')):
+
                 print(f"Login successful for user '{user}'.")
                 return True
             else:
@@ -75,5 +107,3 @@ def login(user, master_p):
     except FileNotFoundError:
         print("File does not exist. Create a new one!")
         return None
-
-
