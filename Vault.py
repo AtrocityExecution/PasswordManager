@@ -9,9 +9,8 @@ from PIL import Image
 import os
 from Credentials import *
 
-
 ctk.set_appearance_mode("system")
-ctk.set_default_color_theme("green")
+ctk.set_default_color_theme("Themes/Harlequin.json")
 vault = {}
 
 
@@ -78,15 +77,22 @@ class PasswordManager(ctk.CTk):
         # Password Credentials
         self.grid_rowconfigure((0, 3), weight=1)
         self.grid_columnconfigure((0, 3), weight=1)
-        self.PC_frame = ctk.CTkFrame(self, corner_radius=0)
+        self.PC_frame = ctk.CTkFrame(self, corner_radius=10, fg_color="green")
         self.PC_frame.grid(row=0, column=0, rowspan=2, columnspan=4, padx=20, pady=(20, 0),
-        sticky="nsew")
-        self.CredBox = ctk.CTkTextbox(self.PC_frame, width=400, corner_radius=0, state="disabled",
-                                      activate_scrollbars=True)
-        self.CredBox.grid(row=0, column=0, sticky="nsew")
-
-
-        ##self.passwordvault_credentials.insert("0", self.password)
+                           sticky="nsew")
+        # self.CredBox = ctk.CTkTextbox(self.PC_frame, width=self.width, corner_radius=0, #state="disabled",
+        #                             activate_scrollbars=True)
+        # self.CredBox.grid(row=0, column=0, rowspan=2, columnspan=4, padx=20, pady=(20, 0), sticky="nsew")
+        self.tree = ctk.CTkTabview(self.PC_frame, width=self.width)
+        self.tree.pack(pady=10)
+        self.tab_1 = self.tree.add("Usernames")
+        self.tab_2 = self.tree.add("Passwords")
+        self.tab_3 = self.tree.add("Websites")
+        self.tab_1_label = ctk.CTkLabel(
+            self.tree.tab("Usernames"),
+            text=show_user_credentials(user)
+        )
+        self.tab_1_label.pack(pady=10)
 
         # Button Options
         self.cimput = ctk.CTkButton(master=self, text="Add Entry", command=self.add_e)
@@ -136,7 +142,7 @@ class PasswordManager(ctk.CTk):
             self.password = ''.join([self.password, random.choice(all)])
 
         print("\n" + self.password + "\n")
-        #self.CredBox.insert("0", self.password)
+        # self.CredBox.insert("0", self.password)
 
     def add_e(self):
 
@@ -147,7 +153,7 @@ class PasswordManager(ctk.CTk):
                                     border_width=2, corner_radius=10)
         self.u_entry.pack(side="top", padx=20, pady=20)
         self.p_entry = ctk.CTkEntry(master=self.adbutton, placeholder_text="Password", width=120, height=25,
-                                    border_width=2, corner_radius=10)
+                                    border_width=2, corner_radius=10, show="*")
         self.p_entry.pack(side="top", padx=20, pady=20)
         self.w_entry = ctk.CTkEntry(master=self.adbutton, placeholder_text="Website", width=120, height=25,
                                     border_width=2, corner_radius=10)
@@ -176,7 +182,8 @@ class PasswordManager(ctk.CTk):
 
     # Needs Work
     def show_creds(self):
-        pass
+        display = show_user_credentials(user)
+        self.CredBox.insert(END, display)
 
 
 if __name__ == "__main__":

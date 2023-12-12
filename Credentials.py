@@ -76,11 +76,9 @@ def add_user_credentials(user, username, password, website):
         except json.JSONDecodeError:
             data = []
 
-    hashed_password, salt = hash_password(password)
     credentials = {
         "username": username,
-        "password": hashed_password.decode('utf-8'),
-        "salt": salt.decode('utf-8'),
+        "password": password,
         "website": website
     }
     data.append(credentials)
@@ -107,3 +105,20 @@ def login(user, master_p):
     except FileNotFoundError:
         print("File does not exist. Create a new one!")
         return None
+
+
+def show_user_credentials(user):
+    filename = f"{user}_passwords.json"
+
+    try:
+        with open(filename, 'r') as file:
+            show_data = json.load(file)
+            print("\nYour Credentials...\n")
+            for x in show_data:
+                print("Username:", x['username'], "Password:", x['password'], "Website:", x['website'])
+                print("\n")
+            print('\n')
+    except FileNotFoundError:
+        print("\n You do not have any passwords saved!")
+
+    return x
